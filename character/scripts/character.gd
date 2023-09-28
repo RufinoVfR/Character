@@ -1,10 +1,13 @@
 extends CharacterBody2D
 
-const ACCELERATION = 300
-const MAX_SPEED = 100
-const FRICTION = 300
+const ACCELERATION = 500
+const MAX_SPEED = 80
+const FRICTION = 500
 
 var vetocity = Vector2.ZERO
+
+@onready var animationPlayer = $AnimationPlayer
+@onready var animationTree = $AnimationTree
 
 func _physics_process(delta):
 		var input_vector = Vector2.ZERO
@@ -13,9 +16,11 @@ func _physics_process(delta):
 		input_vector = input_vector.normalized()
 		
 		if input_vector != Vector2.ZERO:
-			velocity += input_vector * ACCELERATION * delta
-			velocity = velocity.limit_length(MAX_SPEED * delta)
+			animationTree.set("parameters/idle/blend_position", input_vector)
+			animationTree.set("parameters/run/blend_position", input_vector)
+			velocity = velocity.move_toward(input_vector * MAX_SPEED, ACCELERATION * delta)
 		else:
+			animationPlayer.play("idle_right")
 			velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
 			
-		move_and_collide(velocity)
+		move_and_collide(velocity * delta)
